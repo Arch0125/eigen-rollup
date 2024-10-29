@@ -19,7 +19,7 @@ const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAdd
 
 // Function to generate random names
 function generateRandomName(): string {
-    const functions = ['mint','mint','mint'];
+    const functions = ['mint','transfer'];
     const method = functions[Math.floor(Math.random() * functions.length)];
    return method;
   }
@@ -47,7 +47,7 @@ function startCreatingTasks() {
       amount: Math.floor(Math.random() * 100),
       address: wallet.address
     }) );
-  }, 24000);
+  }, 5000);
 }
 
 // Start the process
