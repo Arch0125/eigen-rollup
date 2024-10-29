@@ -2,6 +2,9 @@ import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 import fs from 'fs';
 import path from 'path';
+import { mint } from "./token/operations";
+import { transfer } from "./token/operations";
+import axios from "axios";
 dotenv.config();
 
 // Check if the process.env object is empty
@@ -39,6 +42,8 @@ const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAdd
 const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecdsaRegistryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
+let requestID = '5f352cc9d5a54715e1e919a6cc0bb5eca00c6beb5595ec83a6d7512b869cb58b-313733303232323236303839323335373731302f302f33332f312f33332fe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
 
 const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string, taskMetadata: string) => {
     const message = `Hello, ${taskName}`;
@@ -48,11 +53,47 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
 
     console.log(`Signing and responding to task ${taskIndex}`);
 
+    const response = await axios.get(`http://localhost:8080/get-blob?request_id=${requestID}`);
+
+    const dataString = response.data.data;
+    const cleanedData = dataString.replace(/\x00/g, '');
+    let parsedData = JSON.parse(cleanedData);
+
+    console.log(parsedData);
+    const metadata = JSON.parse(taskMetadata);
+    console.log(metadata);
+
+    console.log("Request ID: ", requestID);
+
+    if (taskName === "mint") {
+        const res = mint(metadata.address, metadata.amount, parsedData);
+        console.log(res);
+        parsedData = res;
+    }
+    else if (taskName === "transfer") {
+        const res = mint(metadata.address, metadata.amount, parsedData);
+        console.log(res);
+        parsedData = res;
+        // transfer(metadata.from, metadata.to, metadata.amount)
+    } else {
+        console.log("Invalid task name")
+        return;
+    }
+
+    console.log("Posting updated state to EigenLayer...");
+    const postBlobResponse = await axios.post("http://localhost:8080/submit-blob", {
+        data: JSON.stringify(parsedData)
+    });
+
+    console.log(postBlobResponse.data);
+
+    requestID = postBlobResponse.data.request_id;
+
     const operators = [await wallet.getAddress()];
     const signatures = [signature];
     const signedTask = ethers.AbiCoder.defaultAbiCoder().encode(
         ["address[]", "bytes[]", "uint32"],
-        [operators, signatures, ethers.toBigInt(await provider.getBlockNumber()-1)]
+        [operators, signatures, ethers.toBigInt(await provider.getBlockNumber() - 1)]
     );
 
     const tx = await helloWorldServiceManager.respondToTask(
@@ -65,7 +106,7 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
 };
 
 const registerOperator = async () => {
-    
+
     // Registers as an Operator in EigenLayer.
     try {
         const tx1 = await delegationManager.registerAsOperator({
@@ -78,7 +119,7 @@ const registerOperator = async () => {
     } catch (error) {
         console.error("Error in registering as operator:", error);
     }
-    
+
     const salt = ethers.hexlify(ethers.randomBytes(32));
     const expiry = Math.floor(Date.now() / 1000) + 3600; // Example expiry, 1 hour from now
 
@@ -91,13 +132,13 @@ const registerOperator = async () => {
 
     // Calculate the digest hash, which is a unique value representing the operator, avs, unique value (salt) and expiration date.
     const operatorDigestHash = await avsDirectory.calculateOperatorAVSRegistrationDigestHash(
-        wallet.address, 
-        await helloWorldServiceManager.getAddress(), 
-        salt, 
+        wallet.address,
+        await helloWorldServiceManager.getAddress(),
+        salt,
         expiry
     );
     console.log(operatorDigestHash);
-    
+
     // Sign the digest hash with the operator's private key
     console.log("Signing digest hash with operator's private key");
     const operatorSigningKey = new ethers.SigningKey(process.env.PRIVATE_KEY!);
@@ -108,7 +149,7 @@ const registerOperator = async () => {
 
     console.log("Registering Operator to AVS Registry contract");
 
-    
+
     // Register Operator to AVS
     // Per release here: https://github.com/Layr-Labs/eigenlayer-middleware/blob/v0.2.1-mainnet-rewards/src/unaudited/ECDSAStakeRegistry.sol#L49
     const tx2 = await ecdsaRegistryContract.registerOperatorWithSignature(
@@ -125,7 +166,6 @@ const monitorNewTasks = async () => {
 
     helloWorldServiceManager.on("NewTaskCreated", async (taskIndex: number, task: any) => {
         console.log(`New task detected: ${task.name}`);
-        console.log(`Task metadata: ${task.taskMetadata}`);
         await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name, task.taskMetadata);
     });
 

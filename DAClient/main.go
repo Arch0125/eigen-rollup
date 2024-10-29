@@ -68,9 +68,6 @@ func submitBlobHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error dispersing blob", http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Fprintf(w, "Request ID: %s\nWaiting for confirmation...\n", string(requestID))
-
 	// Poll the status until confirmed or failed
 	for {
 		statusCtx, statusCancel := context.WithTimeout(ctx, time.Second*5)
@@ -84,7 +81,12 @@ func submitBlobHandler(w http.ResponseWriter, r *http.Request) {
 
 		if statusReply.Status == disperser_rpc.BlobStatus_CONFIRMED {
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "Blob finalized: %s\n", pprint(statusReply))
+			response := map[string]string{
+				"request_id":         string(requestID),
+				"batch_header_hash":  fmt.Sprintf("%x", statusReply.Info.BlobVerificationProof.BatchMetadata.BatchHeaderHash),
+				"blob_index":         fmt.Sprintf("%x", statusReply.Info.BlobVerificationProof.BlobIndex),
+			}
+			json.NewEncoder(w).Encode(response)
 			return
 		} else if statusReply.Status == disperser_rpc.BlobStatus_FAILED {
 			http.Error(w, "Blob failed", http.StatusInternalServerError)
@@ -106,7 +108,7 @@ func getBlobHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	statusReply, err := client.GetBlobStatus(ctx, []byte(requestID))
-	if err != nil || statusReply.Status != disperser_rpc.BlobStatus_CONFIRMED {
+	if err != nil {
 		http.Error(w, "Error retrieving blob or blob not confirmed", http.StatusInternalServerError)
 		return
 	}
@@ -119,6 +121,8 @@ func getBlobHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error retrieving blob data", http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("Blob Data:", string(blobData))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
