@@ -9,6 +9,7 @@ interface IHelloWorldServiceManager {
     struct Task {
         string name;
         uint32 taskCreatedBlock;
+        string taskMetadata;
     }
 
     function latestTaskNum() external view returns (uint32);
@@ -23,7 +24,8 @@ interface IHelloWorldServiceManager {
     ) external view returns (bytes memory);
 
     function createNewTask(
-        string memory name
+        string memory name,
+        string memory taskMetadata
     ) external returns (Task memory);
 
     function respondToTask(

@@ -13,6 +13,11 @@
         "internalType": "address"
       },
       {
+        "name": "_rewardsCoordinator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "_delegationManager",
         "type": "address",
         "internalType": "address"
@@ -136,6 +141,11 @@
         "name": "name",
         "type": "string",
         "internalType": "string"
+      },
+      {
+        "name": "taskMetadata",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "outputs": [
@@ -153,6 +163,11 @@
             "name": "taskCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
+          },
+          {
+            "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
           }
         ]
       }
@@ -290,6 +305,11 @@
             "name": "taskCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
+          },
+          {
+            "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
           }
         ]
       },
@@ -410,6 +430,11 @@
             "name": "taskCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
+          },
+          {
+            "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
           }
         ]
       }
@@ -479,6 +504,11 @@
             "name": "taskCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
+          },
+          {
+            "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
           }
         ]
       },

@@ -19,18 +19,15 @@ const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAdd
 
 // Function to generate random names
 function generateRandomName(): string {
-    const adjectives = ['Quick', 'Lazy', 'Sleepy', 'Noisy', 'Hungry'];
-    const nouns = ['Fox', 'Dog', 'Cat', 'Mouse', 'Bear'];
-    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomName = `${adjective}${noun}${Math.floor(Math.random() * 1000)}`;
-    return randomName;
+    const functions = ['mint','transfer','burn'];
+    const method = functions[Math.floor(Math.random() * functions.length)];
+   return method;
   }
 
 async function createNewTask(taskName: string) {
   try {
     // Send a transaction to the createNewTask function
-    const tx = await helloWorldServiceManager.createNewTask(taskName);
+    const tx = await helloWorldServiceManager.createNewTask(taskName,"abcd");
     
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
@@ -46,7 +43,7 @@ function startCreatingTasks() {
   setInterval(() => {
     const randomName = generateRandomName();
     console.log(`Creating new task with name: ${randomName}`);
-    createNewTask(randomName);
+    createNewTask(randomName );
   }, 24000);
 }
 

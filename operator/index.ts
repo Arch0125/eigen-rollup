@@ -40,7 +40,7 @@ const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecd
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
 
-const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string) => {
+const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string, taskMetadata: string) => {
     const message = `Hello, ${taskName}`;
     const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
     const messageBytes = ethers.getBytes(messageHash);
@@ -56,7 +56,7 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
     );
 
     const tx = await helloWorldServiceManager.respondToTask(
-        { name: taskName, taskCreatedBlock: taskCreatedBlock },
+        { name: taskName, taskCreatedBlock: taskCreatedBlock, taskMetadata: taskMetadata },
         taskIndex,
         signedTask
     );
@@ -124,15 +124,16 @@ const monitorNewTasks = async () => {
     //await helloWorldServiceManager.createNewTask("EigenWorld");
 
     helloWorldServiceManager.on("NewTaskCreated", async (taskIndex: number, task: any) => {
-        console.log(`New task detected: Hello, ${task.name}`);
-        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name);
+        console.log(`New task detected: ${task.name}`);
+        console.log(`Task metadata: ${task.taskMetadata}`);
+        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name, task.taskMetadata);
     });
 
     console.log("Monitoring for new tasks...");
 };
 
 const main = async () => {
-    await registerOperator();
+    // await registerOperator();
     monitorNewTasks().catch((error) => {
         console.error("Error monitoring tasks:", error);
     });
