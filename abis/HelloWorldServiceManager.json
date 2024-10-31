@@ -70,6 +70,40 @@
   },
   {
     "type": "function",
+    "name": "allTasks",
+    "inputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "taskCreatedBlock",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "taskMetadata",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "reqID",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "avsDirectory",
     "inputs": [],
     "outputs": [
@@ -146,6 +180,11 @@
         "name": "taskMetadata",
         "type": "string",
         "internalType": "string"
+      },
+      {
+        "name": "reqID",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "outputs": [
@@ -166,6 +205,11 @@
           },
           {
             "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "reqID",
             "type": "string",
             "internalType": "string"
           }
@@ -289,6 +333,25 @@
   },
   {
     "type": "function",
+    "name": "reqIDs",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "respondToTask",
     "inputs": [
       {
@@ -308,6 +371,11 @@
           },
           {
             "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "reqID",
             "type": "string",
             "internalType": "string"
           }
@@ -435,6 +503,11 @@
             "name": "taskMetadata",
             "type": "string",
             "internalType": "string"
+          },
+          {
+            "name": "reqID",
+            "type": "string",
+            "internalType": "string"
           }
         ]
       }
@@ -507,6 +580,11 @@
           },
           {
             "name": "taskMetadata",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "reqID",
             "type": "string",
             "internalType": "string"
           }

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import * as dotenv from "dotenv";
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 dotenv.config();
 
 // Setup env variables
@@ -11,7 +11,7 @@ const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 let chainId = 31337;
 
 const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/hello-world/${chainId}.json`), 'utf8'));
-const helloWorldServiceManagerAddress = avsDeploymentData.addresses.helloWorldServiceManager;
+const helloWorldServiceManagerAddress = '0xC8A30E83AbCEab0741D28647357366d613814a3F';
 const helloWorldServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/HelloWorldServiceManager.json'), 'utf8'));
 // Initialize contract objects from ABIs
 const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAddress, helloWorldServiceManagerABI, wallet);
@@ -19,15 +19,18 @@ const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAdd
 
 // Function to generate random names
 function generateRandomName(): string {
-    const functions = ['mint','transfer'];
-    const method = functions[Math.floor(Math.random() * functions.length)];
-   return method;
+    const adjectives = ['Quick', 'Lazy', 'Sleepy', 'Noisy', 'Hungry'];
+    const nouns = ['Fox', 'Dog', 'Cat', 'Mouse', 'Bear'];
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const randomName = `${adjective}${noun}${Math.floor(Math.random() * 1000)}`;
+    return randomName;
   }
 
-async function createNewTask(taskName: string, taskMetadata: string) {
+async function createNewTask(taskName: string) {
   try {
     // Send a transaction to the createNewTask function
-    const tx = await helloWorldServiceManager.createNewTask(taskName,taskMetadata);
+    const tx = await helloWorldServiceManager.createNewTask(taskName);
     
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
@@ -41,13 +44,10 @@ async function createNewTask(taskName: string, taskMetadata: string) {
 // Function to create a new task with a random name every 15 seconds
 function startCreatingTasks() {
   setInterval(() => {
-    const method = generateRandomName();
-    console.log(`Creating new task with name: ${method}`);
-    createNewTask(method, JSON.stringify({
-      amount: Math.floor(Math.random() * 100),
-      address: wallet.address
-    }) );
-  }, 5000);
+    const randomName = generateRandomName();
+    console.log(`Creating new task with name: ${randomName}`);
+    createNewTask(randomName);
+  }, 10000);
 }
 
 // Start the process
