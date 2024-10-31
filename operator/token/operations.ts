@@ -1,3 +1,10 @@
+export const tokenStorage = {
+    balances: {},
+    name: "TestToken",
+    symbol: "TT",
+    decimals: 18
+}
+
 export function mint(address:string, amount:number, tokenStorage:any) {
     if (tokenStorage.balances[address]) {
         tokenStorage.balances[address] += amount;
