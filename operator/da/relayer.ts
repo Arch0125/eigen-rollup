@@ -10,7 +10,6 @@ export async function postData(state: any) {
 }
 
 export async function getData(reqID: string) {
-    console.log("Getting data from EigenLayer...");
     const response = await axios.get("http://localhost:8080/get-blob?request_id="+reqID);
     const dataString = response.data.data;
     const cleanedData = dataString.replace(/\x00/g, '');

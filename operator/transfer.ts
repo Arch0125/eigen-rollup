@@ -16,34 +16,9 @@ const helloWorldServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__di
 // Initialize contract objects from ABIs
 const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAddress, helloWorldServiceManagerABI, wallet);
 
-
-// Function to generate random names
-function generateRandomName(): string {
-  const adjectives = ['Quick', 'Lazy', 'Sleepy', 'Noisy', 'Hungry'];
-  const nouns = ['Fox', 'Dog', 'Cat', 'Mouse', 'Bear'];
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const randomName = `${adjective}${noun}${Math.floor(Math.random() * 1000)}`;
-  return randomName;
-}
-
-async function createNewTask(taskName: string) {
-  try {
-    // Send a transaction to the createNewTask function
-    const tx = await helloWorldServiceManager.createNewTask(taskName);
-
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
-
-    console.log(`Transaction successful with hash: ${receipt.hash}`);
-  } catch (error) {
-    console.error('Error sending transaction:', error);
-  }
-}
-
 // Function to create a new task with a random name every 15 seconds
 async function startCreatingTasks() {
-  const tx = await helloWorldServiceManager.createNewTask("mint", JSON.stringify({ address: "0x1547FFb043F7C5BDe7BaF3A03D1342CCD8211a28", amount: 100 }), "0x");
+  const tx = await helloWorldServiceManager.createNewTask("transfer", JSON.stringify({ from : '0x1547FFb043F7C5BDe7BaF3A03D1342CCD8211a28',to: "0x52d80D09E49Ac53C507D87E2474eEDdCb34b6919", amount: 10 }), "0x");
   console.log("Tx hash: ", tx.hash);
 }
 

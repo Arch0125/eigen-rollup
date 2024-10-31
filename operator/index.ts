@@ -6,6 +6,7 @@ import axios from "axios";
 import { mint, transfer } from "./token/operations";
 import { getData, postData } from "./da/relayer";
 import { executeMethod } from "./token/executor";
+import logger from "node-color-log";
 
 dotenv.config();
 
@@ -152,22 +153,28 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
     const signature = await wallet.signMessage(messageBytes);
 
     console.log(`Signing and responding to task ${taskIndex}`);
-    console.log("Fetching prev state from EigenDA...");
+    // console.log("Fetching prev state from EigenDA...");
+    logger.color('white').bold().append('EigenDA Handler || ').info("Fetching previous state from EigenDA ...", requestID);
     const prevState = await getData(requestID);
     const prevReqID = requestID;
-    console.log("Prev state fetched from EigenDA:", prevState);
+    logger.color('white').bold().append('EigenDA Handler || ').info("Previous State:");
+    console.log(prevState);
 
     // Execute the task
-    console.log(taskMetadata)
+    logger.color('white').bold().append('Executor || ').info("Executing task:");
+    console.log(taskMetadata);
     let parsedMetadata = JSON.parse(taskMetadata);
     let updatedState: any;
     updatedState = executeMethod(taskName, parsedMetadata, prevState);
+    logger.color('white').bold().append('Executor || ').info("Updated state after executing task:");
+    console.log(updatedState)
+    logger.color('white').bold().append('Confirmation Handler || ').info("Soft Confirmation by sequencer reached");
 
-    console.log("Updated state after executing task:", updatedState);
-    console.log("Posting updated state to EigenDA...");
+    logger.color('white').bold().append('EigenDA Handler || ').info("Posting updated state to EigenDA...");
     const reqID = await postData(updatedState);
-    console.log("Request ID:", reqID);
+    logger.color('white').bold().append('EigenDA Handler || ').info("New State Request ID: ", reqID);
     requestID = reqID;
+    logger.color('white').bold().append('Confirmation Handler || ').info("Medium Confirmation by DA Layer reached");
 
     const operators = [await wallet.getAddress()];
     const signatures = [signature];
@@ -184,8 +191,9 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
         reqID
     );
     await tx.wait();
-    console.log('Confirmation Tx Hash : ', tx.hash);
-    console.log(`Responded to task.`);
+    logger.color('white').bold().append('L1 Handler || ').info(`Responded to task with L1 Tx Hash : ${tx.hash}`);
+    logger.color('white').bold().append('Confirmation Handler || ').info("Hard Confirmation by L1 reached");
+
 };
 
 const monitorNewTasks = async () => {
@@ -206,6 +214,14 @@ const monitorNewTasks = async () => {
         processedTaskIndices.add(taskIndex);
     });
 
+    console.log(`
+                                                   
+ _____         _____ _____     _____ _       _     
+|  _  |___ ___|  |  |   __|___|     | |_ ___|_|___ 
+|     | . | . |  |  |__   |___|   --|   | .'| |   |
+|__|__|  _|  _| ___/|_____|   |_____|_|_|__,|_|_|_|
+      |_| |_|                                      
+`)
     console.log("Monitoring for new tasks...");
 };
 
