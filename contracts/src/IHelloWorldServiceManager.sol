@@ -15,9 +15,7 @@ interface IHelloWorldServiceManager {
 
     function latestTaskNum() external view returns (uint32);
 
-    function allTaskHashes(
-        uint32 taskIndex
-    ) external view returns (bytes32);
+    function allTaskHashes(uint32 taskIndex) external view returns (bytes32);
 
     function allTaskResponses(
         address operator,
@@ -33,6 +31,8 @@ interface IHelloWorldServiceManager {
     function respondToTask(
         Task calldata task,
         uint32 referenceTaskIndex,
-        bytes calldata signature
+        bytes calldata signature,
+        string memory prevReqID,
+        string memory currReqID
     ) external;
 }

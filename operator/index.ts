@@ -30,7 +30,7 @@ const helloWorldServiceManagerABI = JSON.parse(
 );
 
 const helloWorldServiceManager = new ethers.Contract(
-    '0xa54214aa4c5273789eeff6144a60c41df932f6d7',
+    '0xf3cf5bf9ab547d629315723f16830b5ed574f79a',
     helloWorldServiceManagerABI,
     wallet
 );
@@ -154,6 +154,7 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
     console.log(`Signing and responding to task ${taskIndex}`);
     console.log("Fetching prev state from EigenDA...");
     const prevState = await getData(requestID);
+    const prevReqID = requestID;
     console.log("Prev state fetched from EigenDA:", prevState);
 
     // Execute the task
@@ -178,9 +179,12 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
     const tx = await helloWorldServiceManager.respondToTask(
         { name: taskName, taskCreatedBlock: taskCreatedBlock, taskMetadata: JSON.stringify(parsedMetadata), reqID : "0x" },
         taskIndex,
-        signature
+        signature,
+        prevReqID,
+        reqID
     );
     await tx.wait();
+    console.log('Confirmation Tx Hash : ', tx.hash);
     console.log(`Responded to task.`);
 };
 
@@ -198,7 +202,7 @@ const monitorNewTasks = async () => {
 
         console.log(task)
         console.log(`New task detected: Hello, ${task.name}`);
-        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name, task[2]);
+        signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name, task[2]);
         processedTaskIndices.add(taskIndex);
     });
 
@@ -207,9 +211,9 @@ const monitorNewTasks = async () => {
 
 const main = async () => {
     try {
-        console.log(`Creating new task "EigenWorld"`);
-        const tx = await helloWorldServiceManager.createNewTask("mint",JSON.stringify({ address: "0x123", amount: 100 }),"0x");
-        console.log("Tx hash: ", tx.hash);
+        // console.log(`Creating new task "EigenWorld"`);
+        // const tx = await helloWorldServiceManager.createNewTask("mint",JSON.stringify({ address: "0x123", amount: 100 }),"0x");
+        // console.log("Tx hash: ", tx.hash);
         // await registerOperator();
         monitorNewTasks();
     } catch (error) {

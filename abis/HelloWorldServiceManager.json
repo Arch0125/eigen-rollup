@@ -70,7 +70,7 @@
   },
   {
     "type": "function",
-    "name": "allTasks",
+    "name": "allTaskTraces",
     "inputs": [
       {
         "name": "",
@@ -80,22 +80,17 @@
     ],
     "outputs": [
       {
-        "name": "name",
+        "name": "prevReqID",
         "type": "string",
         "internalType": "string"
       },
       {
-        "name": "taskCreatedBlock",
-        "type": "uint32",
-        "internalType": "uint32"
+        "name": "currReqID",
+        "type": "string",
+        "internalType": "string"
       },
       {
         "name": "taskMetadata",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "reqID",
         "type": "string",
         "internalType": "string"
       }
@@ -333,25 +328,6 @@
   },
   {
     "type": "function",
-    "name": "reqIDs",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "respondToTask",
     "inputs": [
       {
@@ -390,6 +366,16 @@
         "name": "signature",
         "type": "bytes",
         "internalType": "bytes"
+      },
+      {
+        "name": "prevReqID",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "currReqID",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "outputs": [],

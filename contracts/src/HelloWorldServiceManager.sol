@@ -28,9 +28,13 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
     // which is hashed onchain and checked against this mapping
     mapping(uint32 => bytes32) public allTaskHashes;
 
-    mapping(string => Task) public allTasks;
+    struct Trace {
+        string prevReqID;
+        string currReqID;
+        string taskMetadata;
+    }
 
-    string[] public reqIDs;
+    mapping(string => Trace) public allTaskTraces;
 
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
@@ -83,7 +87,9 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
     function respondToTask(
         Task calldata task,
         uint32 referenceTaskIndex,
-        bytes memory signature
+        bytes memory signature,
+        string memory prevReqID,
+        string memory currReqID
     ) external {
         // check that the task is valid, hasn't been responsed yet, and is being responded in time
         require(
@@ -111,12 +117,15 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
 
         require(signer == msg.sender, "Message signer is not operator");
 
+        // store the trace 
+        Trace memory trace;
+        trace.prevReqID = prevReqID;
+        trace.currReqID = currReqID;
+        trace.taskMetadata = task.taskMetadata;
+        allTaskTraces[currReqID] = trace;
+
         // updating the storage with task responses
         allTaskResponses[msg.sender][referenceTaskIndex] = signature;
-
-        allTasks[task.reqID] = task;
-        reqIDs.push(task.reqID);
-
         // emitting event
         emit TaskResponded(referenceTaskIndex, task, msg.sender);
     }

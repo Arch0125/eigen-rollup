@@ -267,7 +267,7 @@ contract HelloWorldTaskManagerSetup is Test {
         bytes memory signedTask = abi.encode(operators, signatures, uint32(block.number));
 
         IHelloWorldServiceManager(helloWorldDeployment.helloWorldServiceManager).respondToTask(
-            task, referenceTaskIndex, signedTask
+            task, referenceTaskIndex, signedTask, "",""
         );
     }
 }
@@ -431,6 +431,6 @@ contract RespondToTask is HelloWorldTaskManagerSetup {
         bytes memory signedTask = abi.encode(operatorsMem, signatures, uint32(block.number));
 
         vm.roll(block.number+1);
-        sm.respondToTask(newTask, taskIndex, signedTask);
+        sm.respondToTask(newTask, taskIndex, signedTask,"","");
     }
 }
