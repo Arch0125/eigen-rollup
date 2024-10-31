@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { mint, transfer } from "./token/operations";
+import { getData, postData } from "./da/relayer";
+import { executeMethod } from "./token/executor";
 
 dotenv.config();
 
@@ -143,13 +145,28 @@ const registerOperator = async () => {
     console.log("Operator registered on AVS successfully");
 };
 
-const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string) => {
+const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string, taskMetadata: string) => {
     const message = `Hello, ${taskName}`;
     const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
     const messageBytes = ethers.getBytes(messageHash);
     const signature = await wallet.signMessage(messageBytes);
 
     console.log(`Signing and responding to task ${taskIndex}`);
+    console.log("Fetching prev state from EigenDA...");
+    const prevState = await getData(requestID);
+    console.log("Prev state fetched from EigenDA:", prevState);
+
+    // Execute the task
+    console.log(taskMetadata)
+    let parsedMetadata = JSON.parse(taskMetadata);
+    let updatedState: any;
+    updatedState = executeMethod(taskName, parsedMetadata, prevState);
+
+    console.log("Updated state after executing task:", updatedState);
+    console.log("Posting updated state to EigenDA...");
+    const reqID = await postData(updatedState);
+    console.log("Request ID:", reqID);
+    requestID = reqID;
 
     const operators = [await wallet.getAddress()];
     const signatures = [signature];
@@ -159,7 +176,7 @@ const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number,
     );
 
     const tx = await helloWorldServiceManager.respondToTask(
-        { name: taskName, taskCreatedBlock: taskCreatedBlock, taskMetadata: "0x", reqID : "0x" },
+        { name: taskName, taskCreatedBlock: taskCreatedBlock, taskMetadata: JSON.stringify(parsedMetadata), reqID : "0x" },
         taskIndex,
         signature
     );
@@ -171,9 +188,18 @@ const monitorNewTasks = async () => {
 
 
 
+    let processedTaskIndices = new Set<number>();
+
     helloWorldServiceManager.on("NewTaskCreated", async (taskIndex: number, task: any) => {
+        if (processedTaskIndices.has(taskIndex)) {
+            console.log(`Task ${taskIndex} already processed, skipping...`);
+            return;
+        }
+
+        console.log(task)
         console.log(`New task detected: Hello, ${task.name}`);
-        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name);
+        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name, task[2]);
+        processedTaskIndices.add(taskIndex);
     });
 
     console.log("Monitoring for new tasks...");
@@ -182,8 +208,7 @@ const monitorNewTasks = async () => {
 const main = async () => {
     try {
         console.log(`Creating new task "EigenWorld"`);
-        const tx = await helloWorldServiceManager.createNewTask("EigenWorld","0x","0x");
-
+        const tx = await helloWorldServiceManager.createNewTask("mint",JSON.stringify({ address: "0x123", amount: 100 }),"0x");
         console.log("Tx hash: ", tx.hash);
         // await registerOperator();
         monitorNewTasks();

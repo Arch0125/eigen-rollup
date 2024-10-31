@@ -1,5 +1,3 @@
-export const tokenStorage  ={}
-
 export function mint(address:string, amount:number, tokenStorage:any) {
     if (tokenStorage.balances[address]) {
         tokenStorage.balances[address] += amount;
