@@ -28,6 +28,10 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
     // which is hashed onchain and checked against this mapping
     mapping(uint32 => bytes32) public allTaskHashes;
 
+    mapping(string => Task) public allTasks;
+
+    string[] public reqIDs;
+
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
 
@@ -58,13 +62,15 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
     // NOTE: this function creates new task, assigns it a taskId
     function createNewTask(
         string memory name,
-        string memory taskMetadata
+        string memory taskMetadata,
+        string memory reqID
     ) external returns (Task memory) {
         // create a new task struct
         Task memory newTask;
         newTask.name = name;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.taskMetadata = taskMetadata;
+        newTask.reqID = reqID;
 
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
@@ -99,6 +105,9 @@ contract HelloWorldServiceManager is ECDSAServiceManagerBase, IHelloWorldService
 
         // updating the storage with task responses
         allTaskResponses[msg.sender][referenceTaskIndex] = signature;
+
+        allTasks[task.reqID] = task;
+        reqIDs.push(task.reqID);
 
         // emitting event
         emit TaskResponded(referenceTaskIndex, task, msg.sender);

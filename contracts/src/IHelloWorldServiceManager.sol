@@ -10,6 +10,7 @@ interface IHelloWorldServiceManager {
         string name;
         uint32 taskCreatedBlock;
         string taskMetadata;
+        string reqID;
     }
 
     function latestTaskNum() external view returns (uint32);
@@ -25,7 +26,8 @@ interface IHelloWorldServiceManager {
 
     function createNewTask(
         string memory name,
-        string memory taskMetadata
+        string memory taskMetadata,
+        string memory reqID
     ) external returns (Task memory);
 
     function respondToTask(

@@ -246,7 +246,7 @@ contract HelloWorldTaskManagerSetup is Test {
             IHelloWorldServiceManager(helloWorldDeployment.helloWorldServiceManager);
 
         vm.prank(generator.key.addr);
-        helloWorldServiceManager.createNewTask(taskName,"");
+        helloWorldServiceManager.createNewTask(taskName,"", "");
     }
 
     function respondToTask(
@@ -373,7 +373,7 @@ contract CreateTask is HelloWorldTaskManagerSetup {
         string memory taskName = "Test Task";
 
         vm.prank(generator.key.addr);
-        IHelloWorldServiceManager.Task memory newTask = sm.createNewTask(taskName, "");
+        IHelloWorldServiceManager.Task memory newTask = sm.createNewTask(taskName, "", "");
     }
 }
 
@@ -416,7 +416,7 @@ contract RespondToTask is HelloWorldTaskManagerSetup {
 
     function testRespondToTask() public {
         string memory taskName = "TestTask";
-        IHelloWorldServiceManager.Task memory newTask = sm.createNewTask(taskName, "");
+        IHelloWorldServiceManager.Task memory newTask = sm.createNewTask(taskName, "", "");
         uint32 taskIndex = sm.latestTaskNum() - 1;
 
         bytes32 messageHash = keccak256(abi.encodePacked("Hello, ", taskName));
